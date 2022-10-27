@@ -5,8 +5,8 @@ uint8_t IR4 = 0;
 uint8_t IR5 = 0;
 uint8_t IRread = 0;
 // Sensor read out
-uint8_t black = 0; // Detect black line read out == 0
-uint8_t white = 1; // Detect white area read out == 1
+uint8_t black = 1; // Detect black line read out == 0
+uint8_t white = 0; // Detect white area read out == 1
 
 void FST(int spl, int spr) //เดินตามเส้นเจอแยกหยุด
 {
@@ -24,7 +24,7 @@ void FST(int spl, int spr) //เดินตามเส้นเจอแยก
       Motor(0, spr);
     else if ((IR2 == black) && (IR4 == white) && (IR3 == white))
       Motor(spl, 0);
-    else
+    else if ((IR2 == black) && (IR4 == black) && (IR3 == black))
     {
       Motor(0, 0);
       break;
@@ -48,35 +48,43 @@ void FF(int spl, int spr) //เดินตามเส้นเจอแยก�
       Motor(0, spr);
     else if ((IR2 == black) && (IR4 == white) && (IR3 == white))
       Motor(spl, 0);
-    else
+    else if ((IR2 == black) && (IR4 == black) && (IR3 == black))
     {
-      do
+      Motor(spl, spr);
+      while (1)
       {
-        Motor(spl, spr);
         IR2 = digitalRead(s2);
         IR4 = digitalRead(s4);
-      } while ((IR2 == black) && (IR3 == black));
-      Motor(0, 0);
+        if (IR2 == white && IR4 == white)
+          break;
+      }
+      MotorStop();
       break;
     }
   }
 }
 
-void FFL(int spl, int spr) //เดินตามเส้นเจอแยกซ้ายข้ามแล้วหยุด
+void FFR(int spl, int spr) //เดินตามเส้นเจอแยกซ้ายข้ามแล้วหยุด
 {
   while (1)
   {
     IR1 = digitalRead(s1);
     IR2 = digitalRead(s2);
     IR3 = digitalRead(s3);
+    IR4 = digitalRead(s4);
 
+    if(IR1 == black)
+      digitalWrite(L2, HIGH);
     if ((IR1 == black) && (IR2 == black) && (IR3 == black)) { // Exit loop when Sensor IR1, 2 and 3 no longer detect black line
-      while ((IR1 == black) && (IR2 == black) && (IR3 == black)) {
+      do {
+        digitalWrite(L1, HIGH);
         Motor(spl, spr);
         IR1 = digitalRead(s1);
         IR2 = digitalRead(s2);
         IR3 = digitalRead(s3);
-      }
+      } while ((IR1 == black) && (IR2 == black) && (IR3 == black));
+      digitalWrite(L1, LOW);
+      MotorStop();
       break;
     }
 
@@ -93,23 +101,163 @@ void FFL(int spl, int spr) //เดินตามเส้นเจอแยก
   }
 }
 
-void FFR(int spl, int spr) //เดินตามเส้นเจอแยกขวาข้ามแล้วหยุด
+void darkone(int spl, int spr) //เดินตามเส้นเจอแยกซ้ายข้ามแล้วหยุด
+{
+  while (1)
+  {
+    IR1 = digitalRead(s1);
+    IR2 = digitalRead(s2);
+    IR3 = digitalRead(s3);
+    IR4 = digitalRead(s4);
+
+    if ((IR1 == white) && (IR2 == white) && (IR3 == white)) { // Exit loop when Sensor IR1, 2 and 3 no longer detect black line
+      while(1) {
+        IR1 = digitalRead(s1);
+        IR2 = digitalRead(s2);
+        IR3 = digitalRead(s3);
+        IR4 = digitalRead(s4);
+        if(IR4 == white)
+        {
+          Motor(spl, 0);
+        }
+        else if((IR1 == black) && (IR2 == black) && (IR3 == white))
+        {
+          MotorStop();
+          break;
+        }
+        else
+          Motor(spl,spr);
+      } 
+      digitalWrite(L1, LOW);
+      MotorStop();
+      break;
+    }
+
+    IR2 = digitalRead(s2);
+    IR3 = digitalRead(s3);
+    IR4 = digitalRead(s4);
+
+    if ((IR2 == black) && (IR4 == black))
+      Motor(spl, spr);
+    else if ((IR2 == black) && (IR4 == white) && (IR3 == black))
+      Motor(0, spr);
+    else if ((IR2 == white) && (IR4 == black) && (IR3 == black))
+      Motor(spl, 0);
+  }
+}
+
+void darktwo(int spl, int spr) //เดินตามเส้นเจอแยกซ้ายข้ามแล้วหยุด
+{
+  while (1)
+  {
+    IR5 = digitalRead(s5);
+    IR2 = digitalRead(s2);
+    IR3 = digitalRead(s3);
+    IR4 = digitalRead(s4);
+
+    if ((IR5 == white) && (IR4 == white) && (IR3 == white)) { // Exit loop when Sensor IR1, 2 and 3 no longer detect black line
+      while(1) {
+        IR5 = digitalRead(s5);
+        IR2 = digitalRead(s2);
+        IR3 = digitalRead(s3);
+        IR4 = digitalRead(s4);
+        if(IR2 == white)
+        {
+          Motor(0, spr);
+        }
+        else if((IR5 == black) && (IR4 == black) && (IR3 == white))
+        {
+          MotorStop();
+          delay(3000);
+          break;
+        }
+        else
+          Motor(spl,spr);
+      } 
+      digitalWrite(L1, LOW);
+      MotorStop();
+      break;
+    }
+
+    IR2 = digitalRead(s2);
+    IR3 = digitalRead(s3);
+    IR4 = digitalRead(s4);
+
+    if ((IR2 == black) && (IR4 == black))
+      Motor(spl, spr);
+    else if ((IR2 == black) && (IR4 == white) && (IR3 == black))
+      Motor(0, spr);
+    else if ((IR2 == white) && (IR4 == black) && (IR3 == black))
+      Motor(spl, 0);
+  }
+}
+
+void darkthree(int spl, int spr) //เดินตามเส้นเจอแยกซ้ายข้ามแล้วหยุด
+{
+  while (1)
+  {
+    IR1 = digitalRead(s1);
+    IR2 = digitalRead(s2);
+    IR3 = digitalRead(s3);
+    IR4 = digitalRead(s4);
+
+    if ((IR1 == white) && (IR2 == white) && (IR3 == white)) { // Exit loop when Sensor IR1, 2 and 3 no longer detect black line
+      while(1) {
+        IR1 = digitalRead(s1);
+        IR2 = digitalRead(s2);
+        IR3 = digitalRead(s3);
+        IR4 = digitalRead(s4);
+        if(IR4 == white)
+        {
+          Motor(0, spr);
+        }
+        else if((IR1 == black) && (IR2 == black) && (IR3 == white))
+        {
+          MotorStop();
+          delay(3000);
+          break;
+        }
+        else
+          Motor(spl,spr);
+      } 
+      digitalWrite(L1, LOW);
+      MotorStop();
+      break;
+    }
+
+    IR2 = digitalRead(s2);
+    IR3 = digitalRead(s3);
+    IR4 = digitalRead(s4);
+
+    if ((IR2 == black) && (IR4 == black))
+      Motor(spl, spr);
+    else if ((IR2 == black) && (IR4 == white) && (IR3 == black))
+      Motor(0, spr);
+    else if ((IR2 == white) && (IR4 == black) && (IR3 == black))
+      Motor(spl, 0);
+  }
+}
+
+void FFL(int spl, int spr) //เดินตามเส้นเจอแยกขวาข้ามแล้วหยุด
 {
   while (1)
   {
     //IR1 = digitalRead(s1);
-    //IR2 = digitalRead(s2);
+    IR2 = digitalRead(s2);
     IR3 = digitalRead(s3);
     IR4 = digitalRead(s4);
     IR5 = digitalRead(s5);
 
     if ((IR3 == black) && (IR4 == black) && (IR5 == black)) {
-      while ((IR3 == black) && (IR4 == black) && (IR5 == black)) {
+      do {
+        digitalWrite(L1, HIGH);
         Motor(spl, spr);
         IR3 = digitalRead(s3);
         IR4 = digitalRead(s4);
         IR5 = digitalRead(s5);
-      }
+      } while ((IR3 == black) && (IR4 == black) && (IR5 == black));
+      Motor(0, 0);
+      digitalWrite(L1, LOW);
       break;
     }
 
@@ -144,16 +292,18 @@ void FL(int spl, int spr) //เดินตามเส้นเจอแยก�
       Motor(spl, 0);
     else
     {
-      do
-      {
-        Motor(0, spr);
-        IR1 = digitalRead(s1);
-        IR3 = digitalRead(s3);
-        IR5 = digitalRead(s5);
-      } while ((IR1 == black) || (IR3 == white) || (IR5 == black));
-        Motor(0, 0);
-        break;
-      }
+      Motor(0, spr);
+      delay(500);
+      //      do
+      //      {
+      //        Motor(0, spr);
+      //        IR1 = digitalRead(s1);
+      //        IR3 = digitalRead(s3);
+      //        IR5 = digitalRead(s5);
+      //      } while ((IR1 == black) || (IR3 == white) || (IR5 == black));
+      Motor(0, 0);
+      break;
+    }
   }
 }
 
@@ -175,67 +325,76 @@ void FR(int spl, int spr) //เดินตามเส้นเจอแยก�
       Motor(spl, 0);
     else
     {
-      do
-      {
-        Motor(spl, 0);
-        IR1 = digitalRead(s1);
-        IR3 = digitalRead(s3);
-        IR5 = digitalRead(s5);
-      } while ((IR1 == black) || (IR3 == white) || (IR5 == black));
+      Motor(spl, 0);
+      delay(400);
+      //      do
+      //      {
+      //        Motor(spl, 0);
+      //        IR1 = digitalRead(s1);
+      //        IR3 = digitalRead(s3);
+      //        IR5 = digitalRead(s5);
+      //      } while ((IR1 == black) || (IR3 == white) || (IR5 == black));
       Motor(0, 0);
       break;
     }
   }
 }
 
-void DL(int spl, int spr) // เดินไปส่งคนซ้าย
+void DR(int spl, int spr) // เดินไปส่งคนซ้าย
 {
   while (1)
   {
     IR1 = digitalRead(s1);
     IR2 = digitalRead(s2);
     IR3 = digitalRead(s3);
-    //IR4 = digitalRead(s4);
+    IR4 = digitalRead(s4);
     //IR5 = digitalRead(s5);
 
     if ((IR1 == black) && (IR2 == black) && (IR3 == black))
     {
-      IR1 = digitalRead(s1);
-      IR2 = digitalRead(s2);
-      IR3 = digitalRead(s3);
-      while ((IR1 == black) && (IR2 == black) && (IR3 == black))
-      {
-        Motor(spl, spr);
-        IR1 = digitalRead(s1);
-        IR2 = digitalRead(s2);
-        IR3 = digitalRead(s3);
-      }
-      while (1)
-      {
-        Motor(spl, spr);
-        IR1 = digitalRead(s1);
-        IR2 = digitalRead(s2);
-        IR3 = digitalRead(s3);
-        if ((IR1 == black) && (IR2 == black) && (IR3 == black))
-        {
-          //ส่งคน
-          Motor(0, 0);
-          delay(5000);
-          IR1 = digitalRead(s1);
-          IR2 = digitalRead(s2);
-          IR3 = digitalRead(s3);
-          while ((IR1 == black) && (IR2 == black) && (IR3 == black))
-          {
-            Motor(spl, spr);
-            IR1 = digitalRead(s1);
-            IR2 = digitalRead(s2);
-            IR3 = digitalRead(s3);
-          }
-          Motor(0, 0);
-          break;
-        }
-      }
+      Motor(spl, spr);
+      digitalWrite(L1, HIGH);
+      delay(400);
+      Motor(0, 0);
+      delay(3000);
+      digitalWrite(L1, LOW);
       break;
+      //      IR1 = digitalRead(s1);
+      //      IR2 = digitalRead(s2);
+      //      IR3 = digitalRead(s3);
+      //      while ((IR1 == black) && (IR2 == black) && (IR3 == black))
+      //      {
+      //        Motor(spl, spr);
+      //        IR1 = digitalRead(s1);
+      //        IR2 = digitalRead(s2);
+      //        IR3 = digitalRead(s3);
+      //      }
+      //      while (1)
+      //      {
+      //        Motor(spl, spr);
+      //        IR1 = digitalRead(s1);
+      //        IR2 = digitalRead(s2);
+      //        IR3 = digitalRead(s3);
+      //        if ((IR1 == black) && (IR2 == black) && (IR3 == black))
+      //        {
+      //          //ส่งคน
+      //          Motor(0, 0);
+      //          delay(5000);
+      //          IR1 = digitalRead(s1);
+      //          IR2 = digitalRead(s2);
+      //          IR3 = digitalRead(s3);
+      //          while ((IR1 == black) && (IR2 == black) && (IR3 == black))
+      //          {
+      //            Motor(spl, spr);
+      //            IR1 = digitalRead(s1);
+      //            IR2 = digitalRead(s2);
+      //            IR3 = digitalRead(s3);
+      //          }
+      //          Motor(0, 0);
+      //          break;
+      //        }
+      //      }
+      //      break;
     }
 
     IR2 = digitalRead(s2);
@@ -251,54 +410,61 @@ void DL(int spl, int spr) // เดินไปส่งคนซ้าย
   }
 }
 
-void DR(int spl, int spr) // เดินไปส่งคนซ้าย
+void DL(int spl, int spr) // เดินไปส่งคนซ้าย
 {
   while (1)
   {
     //IR1 = digitalRead(s1);
-    //IR2 = digitalRead(s2);
+    IR2 = digitalRead(s2);
     IR3 = digitalRead(s3);
     IR4 = digitalRead(s4);
     IR5 = digitalRead(s5);
 
     if ((IR3 == black) && (IR4 == black) && (IR5 == black))
     {
-      IR3 = digitalRead(s3);
-      IR4 = digitalRead(s4);
-      IR5 = digitalRead(s5);
-      while ((IR3 == black) && (IR4 == black) && (IR5 == black))
-      {
-        Motor(spl, spr);
-        IR3 = digitalRead(s3);
-        IR4 = digitalRead(s4);
-        IR5 = digitalRead(s5);
-      }
-      while (1)
-      {
-        Motor(spl, spr);
-        IR3 = digitalRead(s3);
-        IR4 = digitalRead(s4);
-        IR5 = digitalRead(s5);
-        if ((IR3 == black) && (IR4 == black) && (IR5 == black))
-        {
-          //ส่งคน
-          Motor(0, 0);
-          delay(5000);
-          IR3 = digitalRead(s3);
-          IR4 = digitalRead(s4);
-          IR5 = digitalRead(s5);
-          while ((IR3 == black) && (IR4 == black) && (IR5 == black))
-          {
-            Motor(spl, spr);
-            IR3 = digitalRead(s3);
-            IR4 = digitalRead(s4);
-            IR5 = digitalRead(s5);
-          }
-          Motor(0, 0);
-          break;
-        }
-      }
+      Motor(spl, spr);
+      digitalWrite(L1, HIGH);
+      delay(400);
+      Motor(0, 0);
+      delay(3000);
+      digitalWrite(L1, LOW);
       break;
+      //      IR3 = digitalRead(s3);
+      //      IR4 = digitalRead(s4);
+      //      IR5 = digitalRead(s5);
+      //      while ((IR3 == black) && (IR4 == black) && (IR5 == black))
+      //      {
+      //        Motor(spl, spr);
+      //        IR3 = digitalRead(s3);
+      //        IR4 = digitalRead(s4);
+      //        IR5 = digitalRead(s5);
+      //      }
+      //      while (1)
+      //      {
+      //        Motor(spl, spr);
+      //        IR3 = digitalRead(s3);
+      //        IR4 = digitalRead(s4);
+      //        IR5 = digitalRead(s5);
+      //        if ((IR3 == black) && (IR4 == black) && (IR5 == black))
+      //        {
+      //          //ส่งคน
+      //          Motor(0, 0);
+      //          delay(5000);
+      //          IR3 = digitalRead(s3);
+      //          IR4 = digitalRead(s4);
+      //          IR5 = digitalRead(s5);
+      //          while ((IR3 == black) && (IR4 == black) && (IR5 == black))
+      //          {
+      //            Motor(spl, spr);
+      //            IR3 = digitalRead(s3);
+      //            IR4 = digitalRead(s4);
+      //            IR5 = digitalRead(s5);
+      //          }
+      //          Motor(0, 0);
+      //          break;
+      //        }
+      //      }
+      //      break;
     }
 
     IR2 = digitalRead(s2);
@@ -316,78 +482,6 @@ void DR(int spl, int spr) // เดินไปส่งคนซ้าย
 
 void path(int spl, int spr) //ทางม้าลาย
 {
-  //IR1 = digitalRead(s1);
-  IR2 = digitalRead(s2);
-  IR3 = digitalRead(s3);
-  IR4 = digitalRead(s4);
-  //IR5 = digitalRead(s5);
-
-  if ((IR2 == white) && (IR4 == white))
-    Motor(spl, spr);
-  else if ((IR2 == white) && (IR4 == black) && (IR3 == white))
-    Motor(0, spr);
-  else if ((IR2 == black) && (IR4 == white) && (IR3 == white))
-    Motor(spl, 0);
-  else
-  {
-    Motor(0, 0);
-    tone(Buz, 1500);
-    delay(5000);
-    noTone(Buz);
-    int cnt = 0;
-    FF(spl, spr);
-    FF(spl, spr);
-  }
-}
-
-void EvadeL(int spl, int spr) //หลบทางซ้าย
-{
-  Motor(-spl, -spr);
-  delay(500); // กะ
-  do
-  {
-    Motor(spl, -spr);
-    IR1 = digitalRead(s1);
-  } while (IR1 == white);
-  Motor(0, spr);
-  delay(500); //กะ
-  Motor(spl, spr);
-  delay(1000); //กะ
-  do
-  {
-    Motor(0, spr);
-    IR3 = digitalRead(s3);
-  } while (IR3 == white);
-  Motor(spl, 0);
-  delay(500); //กะ
-  Motor(0, 0);
-}
-
-void EvadeR(int spl, int spr) //หลบทางขวา
-{
-  Motor(-spl, -spr);
-  delay(500); // กะ
-  do
-  {
-    Motor(-spl, spr);
-    IR5 = digitalRead(s5);
-  } while (IR5 == white);
-  Motor(spl, 0);
-  delay(500); //กะ
-  Motor(spl, spr);
-  delay(1000); //กะ
-  do
-  {
-    Motor(spl, 0);
-    IR3 = digitalRead(s3);
-  } while (IR3 == white);
-  Motor(0, spr);
-  delay(500); //กะ
-  Motor(0, 0);
-}
-
-void EnterBlack(int spl, int spr) // เข้าเขตมืด
-{
   while (1)
   {
     //IR1 = digitalRead(s1);
@@ -396,11 +490,203 @@ void EnterBlack(int spl, int spr) // เข้าเขตมืด
     IR4 = digitalRead(s4);
     //IR5 = digitalRead(s5);
 
-    if ((IR2 == black) && (IR4 == black) && (IR3 == white))
+    if ((IR2 == white) && (IR4 == white))
+      Motor(spl, spr);
+    else if ((IR2 == white) && (IR4 == black) && (IR3 == white))
+      Motor(0, spr);
+    else if ((IR2 == black) && (IR4 == white) && (IR3 == white))
+      Motor(spl, 0);
+    else if ((IR2 == black) && (IR4 == black) && (IR3 == black))
     {
-      black = 1;
-      white = 0;
+      digitalWrite(L1, HIGH);
       Motor(0, 0);
+      tone(Buz, 1500);
+      delay(5000);
+      noTone(Buz);
+      Motor(spd, spd);
+      delay(80);
+      FF(spd, spd);
+      digitalWrite(L1, LOW);
+      break;
+    }
+  }
+}
+
+void EvadeL(int spl, int spr) //untest
+{
+  while (1)
+  {
+    //IR1 = digitalRead(s1);
+    IR2 = digitalRead(s2);
+    IR3 = digitalRead(s3);
+    IR4 = digitalRead(s4);
+    IR5 = digitalRead(s5);
+
+    if ((IR2 == white) && (IR4 == white))
+      Motor(spl, spr);
+    else if ((IR2 == white) && (IR4 == black) && (IR3 == white) && (IR1 == white))
+      Motor(0, spr);
+    else if ((IR2 == black) && (IR4 == white) && (IR3 == white) && (IR1 == white))
+      Motor(spl, 0);
+    else if ((IR4 == black) && (IR5 == black) && (IR3 == black))
+    {
+      digitalWrite(L1, HIGH);
+      Motor(spl, -spr);
+      while (1)
+      {
+        IR5 = digitalRead(s5);
+        if (IR5 == white)
+        {
+          MotorStop();
+          break;
+        }
+      }
+      Motor(spl, spr);
+      delay(400);
+      Motor(0, spr);
+      delay(500);
+      Motor(spl, spr);
+      delay(1200);
+      Motor(0, spr);
+      delay(400);
+      Motor(spl, spr);
+      delay(500);
+      Motor(-spl, spr);
+      while (1)
+      {
+        IR4 = digitalRead(s4);
+        if (IR4 == black)
+        {
+          break;
+        }
+      }
+
+      Motor(spl, spr);
+      while (1)
+      {
+        IR1 = digitalRead(s1);
+        if (IR1 == black)
+        {
+          break;
+        }
+      }
+      Motor(spl, 0);
+      while (1)
+      {
+        IR4 = digitalRead(s4);
+        if (IR4 == black)
+        {
+          MotorStop();
+          break;
+        }
+      }
+      digitalWrite(L1, LOW);
+      break;
+    }
+  }
+}
+
+void EvadeR(int spl, int spr) //untest
+{
+  while (1)
+  {
+    IR1 = digitalRead(s1);
+    IR2 = digitalRead(s2);
+    IR3 = digitalRead(s3);
+    IR4 = digitalRead(s4);
+    //IR5 = digitalRead(s5);
+
+    if ((IR2 == white) && (IR4 == white))
+      Motor(spl, spr);
+    else if ((IR2 == white) && (IR4 == black) && (IR3 == white) && (IR1 == white))
+      Motor(0, spr);
+    else if ((IR2 == black) && (IR4 == white) && (IR3 == white) && (IR1 == white))
+      Motor(spl, 0);
+    else if ((IR2 == black) && (IR1 == black) && (IR3 == black))
+    {
+      digitalWrite(L1, HIGH);
+      Motor(-spl, spr);
+      while (1)
+      {
+        IR1 = digitalRead(s1);
+        if (IR1 == white)
+        {
+          MotorStop();
+          break;
+        }
+      }
+      Motor(spl, spr);
+      delay(450);
+      Motor(spl, 0);
+      delay(350);
+      Motor(spl, spr);
+      delay(1500);
+      IR3 = digitalRead(s3);
+      if (IR3 == white)
+      {
+        Motor(spl, -spr);
+        while (1)
+        {
+          IR2 = digitalRead(s2);
+          if (IR2 == black)
+          {
+            break;
+          }
+        }
+
+        Motor(spl, spr);
+        while (1)
+        {
+          IR5 = digitalRead(s5);
+          if (IR5 == black)
+          {
+            break;
+          }
+        }
+        Motor(0, spr);
+        while (1)
+        {
+          IR2 = digitalRead(s2);
+          if (IR2 == black)
+          {
+            MotorStop();
+            break;
+          }
+        }
+      }
+      digitalWrite(L1, LOW);
+      break;
+    }
+  }
+}
+
+void reverse()
+{
+  if(black == 1)
+    black = 0;
+  else
+    black = 1;
+  if(white == 1)
+    white = 0;
+  else
+    white = 1;  
+}
+
+void EnterBlack(int spl, int spr) // เข้าเขตมืด
+{
+  while (1)
+  {
+    IR1 = digitalRead(s1);
+    IR2 = digitalRead(s2);
+    IR3 = digitalRead(s3);
+    IR4 = digitalRead(s4);
+    IR5 = digitalRead(s5);
+
+    if ((IR1 == black) && (IR5 == black) && (IR3 == white))
+    {
+      digitalWrite(L3, HIGH);
+      //reverse();
+      MotorStop();
       break;
     }
 
@@ -429,9 +715,9 @@ void LeaveBlack(int spl, int spr) //ออกเขตมืด
 
     if ((IR2 == black) && (IR4 == black) && (IR3 == white))
     {
-      black = 0;
-      white = 1;
-      Motor(0, 0);
+      digitalWrite(L3, LOW);
+      //reverse();
+      MotorStop();
       break;
     }
 
@@ -452,37 +738,42 @@ void rotate(int spl, int spr) //กลับรถ
 {
   while (1)
   {
+    Motor(-spl, -spr);
     while (1)
     {
-      Motor(-spl, -spr);
       IR2 = digitalRead(s2);
       IR3 = digitalRead(s3);
       IR4 = digitalRead(s4);
-
       if ((IR2 == white) && (IR4 == white) && (IR3 == black))
         break;
     }
+
     while (1)
     {
       Motor(-spl, spr);
-      IR2 = digitalRead(s2);
-      if (IR2 == black)
+      //delay(500);
+      while (1)
       {
-        while (1)
-        {
-          Motor(-spl, spr);
-          IR3 = digitalRead(s3);
-          if (IR3 == black)
-            break;
+        IR1 = digitalRead(s1);
+        if (IR1 == black) {
+          break;
         }
-        Motor(0, 0);
-        break;
       }
+      while (1)
+      {
+        IR4 = digitalRead(s4);
+        if (IR4 == black) {
+          Motor(0, 0);
+          break;
+        }
+      }
+      break;
     }
+    break;
   }
 }
 
-void branchL1(int spl, int spr) // เลี้ยวกิ่งแคบซ้าย
+void branchR1(int spl, int spr) // เลี้ยวกิ่งแคบซ้าย
 {
   while (1)
   {
@@ -498,28 +789,31 @@ void branchL1(int spl, int spr) // เลี้ยวกิ่งแคบซ้
       Motor(spl, 0);
     else if ((IR3 == black) && (IR2 == black))
     {
+      Motor(spl, spr);
+      delay(200);
+      Motor(spl, -spr);
       while (1)
       {
-        Motor(0, spr);
-        IR1 = digitalRead(s1);
-        if (IR1 == black)
+        IR5 = digitalRead(s5);
+        if (IR5 == black)
         {
-          while (1)
-          {
-            Motor(-spl, spr);
-            IR3 = digitalRead(s3);
-            if (IR3 == black)
-              break;
-          }
+          break;
+        }
+      }
+      while (1)
+      {
+        IR2 = digitalRead(s2);
+        if (IR2 == black) {
           Motor(0, 0);
           break;
         }
       }
+      break;
     }
   }
 }
 
-void branchL2(int spl, int spr) // เลี้ยวกิ่งกว้างซ้าย
+void branchR2(int spl, int spr) // เลี้ยวกิ่งกว้างซ้าย
 {
   while (1)
   {
@@ -533,30 +827,34 @@ void branchL2(int spl, int spr) // เลี้ยวกิ่งกว้าง
       Motor(0, spr);
     else if ((IR2 == black) && (IR4 == white) && (IR3 == white))
       Motor(spl, 0);
-    else
+    else if ((IR3 == black) && (IR2 == black))
     {
+      digitalWrite(L1, HIGH);
+      Motor(spl, spr);
+      delay(300);
+      Motor(spl, -spr);
+      //      while (1)
+      //      {
+      //        IR5 = digitalRead(s5);
+      //        if (IR5 == black)
+      //        {
+      //          break;
+      //        }
+      //      }
       while (1)
       {
-        Motor(0, spr);
-        IR1 = digitalRead(s1);
-        if (IR1 == black)
-        {
-          while (1)
-          {
-            Motor(-spl, spr);
-            IR3 = digitalRead(s3);
-            if (IR3 == black)
-              break;
-          }
+        IR2 = digitalRead(s2);
+        if (IR2 == black) {
           Motor(0, 0);
           break;
         }
       }
+      break;
     }
   }
 }
 
-void branchR1(int spl, int spr) // เลี้ยวกิ่งแคบขวา
+void branchL1(int spl, int spr) // เลี้ยวกิ่งแคบขวา
 {
   while (1)
   {
@@ -572,115 +870,31 @@ void branchR1(int spl, int spr) // เลี้ยวกิ่งแคบขว
       Motor(spl, 0);
     else if ((IR3 == black) && (IR4 == black))
     {
-      while (1)
-      {
-        Motor(spl, 0);
-        IR5 = digitalRead(s5);
-        if (IR5 == black)
-        {
-          while (1)
-          {
-            Motor(spl, -spr);
-            IR3 = digitalRead(s3);
-            if (IR3 == black)
-              break;
-          }
-          Motor(0, 0);
-          break;
-        }
-      }
-    }
-  }
-}
-
-void branchR2(int spl, int spr) // เลี้ยวกิ่งกว้างขวา
-{
-  while (1)
-  {
-    IR2 = digitalRead(s2);
-    IR3 = digitalRead(s3);
-    IR4 = digitalRead(s4);
-
-    if ((IR2 == white) && (IR4 == white))
       Motor(spl, spr);
-    else if ((IR2 == white) && (IR4 == black) && (IR3 == white))
-      Motor(0, spr);
-    else if ((IR2 == black) && (IR4 == white) && (IR3 == white))
-      Motor(spl, 0);
-    else
-    {
+      delay(200);
+      Motor(-spl, spr);
       while (1)
       {
-        Motor(spl, 0);
-        IR5 = digitalRead(s5);
-        if (IR5 == black)
-        {
-          while (1)
-          {
-            Motor(spl, -spr);
-            IR3 = digitalRead(s3);
-            if (IR3 == black)
-              break;
-          }
-          Motor(0, 0);
-          break;
-        }
-      }
-    }
-  }
-}
-
-void accident(int spl, int spr)
-{
-  while (1)
-  {
-    IR2 = digitalRead(s2);
-    IR3 = digitalRead(s3);
-    IR4 = digitalRead(s4);
-
-    if ((IR2 == white) && (IR4 == white))
-      Motor(spl, spr);
-    else if ((IR2 == white) && (IR4 == black) && (IR3 == white))
-      Motor(0, spr);
-    else if ((IR2 == black) && (IR4 == white) && (IR3 == white))
-      Motor(spl, 0);
-    else
-    {
-      Motor(0, 0);
-      while (1)
-      {
-        Motor(-spl, -spr);
         IR1 = digitalRead(s1);
-        IR2 = digitalRead(s2);
-        IR3 = digitalRead(s3);
-
-        if ((IR2 == black) && (IR1 == white) && (IR3 == black))
+        if (IR1 == black)
         {
           break;
         }
       }
-      uint8_t d = 0;
       while (1)
       {
-        Motor(-spl, spr);
-        IR3 = digitalRead(s3);
-        if (IR3 == white)
-          d = 1;
-
-        IR3 = digitalRead(s3);
-        if ((IR3 == black) && (d == 1))
-        {
+        IR4 = digitalRead(s2);
+        if (IR4 == black) {
           Motor(0, 0);
           break;
         }
       }
       break;
     }
-
   }
 }
 
-void traffic(int spl, int spr)
+void branchL2(int spl, int spr) // เลี้ยวกิ่งกว้างขวา
 {
   while (1)
   {
@@ -694,17 +908,87 @@ void traffic(int spl, int spr)
       Motor(0, spr);
     else if ((IR2 == black) && (IR4 == white) && (IR3 == white))
       Motor(spl, 0);
-    else
+    else if ((IR3 == black) && (IR4 == black))
     {
-      Motor(0, 0);
-      delay(6000);
-      FF(spl, spr);
-      FF(spl, spr);
+      digitalWrite(L1, HIGH);
+      Motor(spl, spr);
+      delay(300);
+      Motor(-spl, spr);
+      //      while (1)
+      //      {
+      //        IR5 = digitalRead(s5);
+      //        if (IR5 == black)
+      //        {
+      //          break;
+      //        }
+      //      }
+      while (1)
+      {
+        IR4 = digitalRead(s4);
+        if (IR4 == black) {
+          Motor(0, 0);
+          break;
+        }
+      }
+      break;
     }
   }
 }
 
-void L(int spl, int spr) //เลี้ยวแยกครึ่งซ้าย
+void accident(int spl, int spr) //untest
+{
+  while (1)
+  {
+    IR1 = digitalRead(s1);
+    IR2 = digitalRead(s2);
+    IR3 = digitalRead(s3);
+    IR4 = digitalRead(s4);
+    IR5 = digitalRead(s5);
+
+    if ((IR2 == white) && (IR4 == white))
+      Motor(spl, spr);
+    else if ((IR2 == white) && (IR4 == black) && (IR3 == white))
+      Motor(0, spr);
+    else if ((IR2 == black) && (IR4 == white) && (IR3 == white))
+      Motor(spl, 0);
+    else if ((IR5 == black) && (IR1 == black) && (IR3 == black))
+    {
+      rotate(spd, spd);
+      branchR1(spd, spd);
+      break;
+    }
+
+  }
+}
+
+void traffic(int spl, int spr) //untest
+{
+  while (1)
+  {
+    IR2 = digitalRead(s2);
+    IR3 = digitalRead(s3);
+    IR4 = digitalRead(s4);
+
+    if ((IR2 == white) && (IR4 == white))
+      Motor(spl, spr);
+    else if ((IR2 == white) && (IR4 == black) && (IR3 == white))
+      Motor(0, spr);
+    else if ((IR2 == black) && (IR4 == white) && (IR3 == white))
+      Motor(spl, 0);
+    else if ((IR2 == black) && (IR4 == black) && (IR3 == black))
+    {
+      digitalWrite(L2, HIGH);
+      MotorStop();
+      delay(6000);
+      digitalWrite(L2, LOW);
+      FF(spl, spr);
+      FF(spl, spr);
+      break;
+    }
+  }
+}
+
+void R(int spl, int spr) //untest
 {
   while (1)
   {
@@ -721,16 +1005,24 @@ void L(int spl, int spr) //เลี้ยวแยกครึ่งซ้า�
       Motor(spl, 0);
     else if ((IR1 == black) && (IR2 == black) && (IR3 == black))
     {
+      Motor(spl, spr);
+      delay(200);
+      Motor(spl, -spr);
       while (1)
       {
-        Motor(spl, -spr);
-        IR2 = digitalRead(s2);
-        IR3 = digitalRead(s3);
         IR4 = digitalRead(s4);
-
-        if ((IR2 == white) && (IR4 == white) && (IR3 == black))
+        if ((IR4 == white))
         {
-          Motor(0, 0);
+          break;
+        }
+      }
+      while (1)
+      {
+        IR3 = digitalRead(s3);
+
+        if ((IR3 == black))
+        {
+          MotorStop();
           break;
         }
       }
@@ -739,7 +1031,7 @@ void L(int spl, int spr) //เลี้ยวแยกครึ่งซ้า�
   }
 }
 
-void R(int spl, int spr) //เลี้ยวแยกครึ่งขวา
+void L(int spl, int spr) //untest
 {
   while (1)
   {
@@ -756,16 +1048,24 @@ void R(int spl, int spr) //เลี้ยวแยกครึ่งขวา
       Motor(spl, 0);
     else if ((IR3 == black) && (IR4 == black) && (IR5 == black))
     {
+      Motor(spl, spr);
+      delay(200);
+      Motor(-spl, spr);
       while (1)
       {
-        Motor(-spl, spr);
         IR2 = digitalRead(s2);
-        IR3 = digitalRead(s3);
-        IR4 = digitalRead(s4);
-
-        if ((IR2 == white) && (IR4 == white) && (IR3 == black))
+        if ((IR2 == white))
         {
-          Motor(0, 0);
+          break;
+        }
+      }
+      while (1)
+      {
+        IR3 = digitalRead(s3);
+
+        if ((IR3 == black))
+        {
+          MotorStop();
           break;
         }
       }

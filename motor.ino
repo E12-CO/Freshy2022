@@ -2,9 +2,9 @@ void MotorInit(){// Initialize pin mode
   pinMode(3,OUTPUT); //pwmL
   pinMode(4,OUTPUT);
   pinMode(2,OUTPUT);
-  pinMode(6,OUTPUT); //pwmR
+  pinMode(5,OUTPUT); //pwmR
   pinMode(7,OUTPUT);
-  pinMode(5,OUTPUT);
+  pinMode(6,OUTPUT);
 }
 
 void Motor(int spl , int spr){    // ค่าในตัวเเปลไม่เกิน 100
@@ -12,14 +12,14 @@ void Motor(int spl , int spr){    // ค่าในตัวเเปลไม�
   if(spl>0 ){   
 
    analogWrite (3,(spl*255)/100);
-   digitalWrite(4,HIGH);
-   digitalWrite(2,LOW);
+   digitalWrite(4,LOW);
+   digitalWrite(2,HIGH);
     
   }else if(spl<0 ){
 
    analogWrite (3,((-spl)*255)/100);
-   digitalWrite(4,LOW);
-   digitalWrite(2,HIGH);
+   digitalWrite(4,HIGH);
+   digitalWrite(2,LOW);
     
   }else{
    analogWrite (3,255);
@@ -29,20 +29,20 @@ void Motor(int spl , int spr){    // ค่าในตัวเเปลไม�
 
   if(spr>0 ){
 
-   analogWrite (6,(spr*255)/100);
+   analogWrite (5,(spr*255)/100);
    digitalWrite(7,HIGH);
-   digitalWrite(5,LOW);
+   digitalWrite(6,LOW);
     
   }else if(spr<0 ){
 
-   analogWrite (6,((-spr)*255)/100);
+   analogWrite (5,((-spr)*255)/100);
    digitalWrite(7,LOW);
-   digitalWrite(5,HIGH);
+   digitalWrite(6,HIGH);
     
   }else{
-   analogWrite (6,255);
+   analogWrite (5,255);
    digitalWrite(7,LOW);
-   digitalWrite(5,LOW);    
+   digitalWrite(6,LOW);    
   }
 
   if(spl>100){
@@ -57,6 +57,11 @@ void Motor(int spl , int spr){    // ค่าในตัวเเปลไม�
            spr = -100 ;
          }
   
+}
+
+void MotorStop(){
+  analogWrite (3,0);  
+  analogWrite (5,0);
 }
 //-------------------------------------------------------------- SWITCH
 int sw(int sum){                   
