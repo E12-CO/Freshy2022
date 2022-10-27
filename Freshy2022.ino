@@ -16,7 +16,7 @@
 #define Sw4 12
 #define Sw3 13
 
-uint8_t spd = 200;
+uint8_t spd = 40;
 uint16_t cnt = 0;
 
 void setup() {
@@ -37,22 +37,49 @@ void setup() {
   MotorInit();
   
   startt();
+  IFFR(spd,spd);
+  
+//  //game();
+//  //เข้าเขตมืด
+//  EnterBlack(spd, spd);
+//
+//  //ข้ามจุด3
+//  FFR(spd, spd);
+//  FFR(spd, spd);
+//
+//  //เจอกิ่ง
+//
+//  //ส่งคนจุด2 ซ้าย
+//  DL(spd, spd);
+//
+//  //เจอกิ่ง
+//
+//  //ส่งคนจุด3 ขวา
+//  DR(spd, spd);
+//
+//  //ออกจากเขตมืด
+//  LeaveBlack(spd, spd);
+
 }
+
+
 
 void game()
 {
+  FF(spd,spd);
+  
   //เลี้ยวเข้าครั้งแรก
   FR(spd, spd);
 
   //เดินตรงจนเจอเขตลดความเร็ว
-  FST(spd, spd);
+  FF(spd, spd);
 
   //เข้าเขตลดความเร็ว
-  spd = 100;
+  spd = 30;
   FF(spd, spd);
 
   //ออกเขตลดความเร็ว
-  spd = 200;
+  spd = 40;
 
   //ส่งคนจุดแรก ขวา
   DR(spd, spd);
@@ -73,18 +100,21 @@ void game()
   EnterBlack(spd, spd);
 
   //ข้ามจุด3
-  FFR(spd, spd);
-  FFR(spd, spd);
-
+//  FFR(spd, spd);
+//  FFR(spd, spd);
+  darkone(spd, spd);
+  
   //เจอกิ่ง
 
   //ส่งคนจุด2 ซ้าย
-  DL(spd, spd);
-
+  //DL(spd, spd);
+  darktwo(spd,spd);
+  
   //เจอกิ่ง
 
   //ส่งคนจุด3 ขวา
-  DR(spd, spd);
+  //DR(spd, spd);
+  darkthree(spd,spd);
 
   //ออกจากเขตมืด
   LeaveBlack(spd, spd);
@@ -94,6 +124,8 @@ void game()
 
   //หลบทางพัง
   EvadeL(spd, spd);
+
+  //กุว่าแตก
 
   //ข้ามจุด6
   FFR(spd, spd);
@@ -140,22 +172,13 @@ void game()
   //เข้าจุดเริ่ม
   FF(spd, spd);
   Motor(spd, spd);
-  delay(1000);
-  Motor(0, 0);
+  delay(100);
+  MotorStop();
 }
 
 void loop() {
   // put your main co00000000de here, to run repeatedly:
-  //  Motor(80 ,80);
-  //  Serial.println("5555");
-  //  delay(2000);
-  //    Motor(0 ,80);
-  //  Serial.println("5555R");
-  //  delay(20040);
-  //      Motor(80 ,0);
-  //  Serial.println("5555L");
-  //  delay(2000);
-  //  read_sensor();
+  read_sensor();
 }
 
 
